@@ -1,14 +1,83 @@
 import "./App.css";
 import { shoppingCart } from "./data";
 import { FaPlus, FaMinus } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Catalog from "./Catalog";
 
+const sampleProductos = {
+  id: 1,
+  title: "iPhone 9",
+  description: "An apple mobile which is nothing like apple",
+  price: 549,
+  discountPercentage: 12.96,
+  rating: 4.69,
+  stock: 94,
+  brand: "Apple",
+  category: "smartphones",
+  thumbnail: "https://cdn.dummyjson.com/product-images/1/thumbnail.jpg",
+  images: [
+    "https://cdn.dummyjson.com/product-images/1/1.jpg",
+    "https://cdn.dummyjson.com/product-images/1/2.jpg",
+    "https://cdn.dummyjson.com/product-images/1/3.jpg",
+    "https://cdn.dummyjson.com/product-images/1/4.jpg",
+    "https://cdn.dummyjson.com/product-images/1/thumbnail.jpg",
+  ],
+};
+
+function Loading() {
+  return <div>Cargando....</div>;
+}
 function App() {
+  const [catalog, setCatalog] = useState({
+    products: [],
+    total: 0,
+    isLoading: true,
+  });
+
+  const [filter, setFilter] = useState({
+    query: "",
+  });
+  useEffect(() => {
+    let url = "https://dummyjson.com/products";
+    if (filter.query) {
+      url = `https://dummyjson.com/products/search?q=${filter.query}`;
+    }
+    setCatalog({
+      ...catalog,
+      isLoading: true,
+    });
+
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        setCatalog({
+          ...data,
+          isLoading: false,
+        });
+      });
+  }, [filter]);
+
+  function handelingQueryChange(e) {
+    setFilter({
+      query: e.target.value,
+    });
+  }
+
   return (
     <div>
-      <ShoppingCart {...shoppingCart} />
+      {catalog.isLoading && <Loading />}
+      <Catalog
+        {...catalog}
+        query={filter.query}
+        onQueryChange={handelingQueryChange}
+      />
     </div>
   );
+  // return (
+  //   <div>
+  //     <ShoppingCart {...shoppingCart} />
+  //   </div>
+  // );
 }
 
 function formatCurrency(amount) {
